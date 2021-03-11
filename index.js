@@ -6,6 +6,7 @@ async function run() {
   const filterEmailChain = require('./filterEmailChain');
 
   const showAnnotation = core.getInput("show_annotation");
+  const cleanupComment = core.getInput("cleanup_message");
 
   let bossCopy;
   if ((showAnnotation === 'false') || (showAnnotation === false)) {
@@ -24,11 +25,13 @@ async function run() {
     if (context.payload.comment) {
       if (context.payload.action === "created" || context.payload.action === "edited") {
         const issueNumber = context.payload.issue.number;
-
         const commentBody = context.payload.comment.body;
         const commentId = context.payload.comment.id;
 
-        const filteredComment = await filterEmailChain(commentBody);
+        // Filter comment for email stuff
+        const filteredComment = await filterEmailChain(commentBody, cleanupComment);
+
+        console.log('cleanupComment', cleanupComment);
 
         if (filteredComment !== false) {
           const revisedMessage = filteredComment + bossCopy;
