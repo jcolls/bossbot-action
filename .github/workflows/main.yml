@@ -7,7 +7,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: BossBot - Github Issue Comment Cleanup - action step
-        uses: banagale/bossbot-action@master
+        uses: banagale/bossbot-action@feature/3/if-outlook-remove-double-newlines
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SHOW_ANNOTATION: true
+          CLEANUP_MESSAGE: true
