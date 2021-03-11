@@ -1,4 +1,4 @@
-module.exports = async function filterEmailChain(issueComment) {
+module.exports = async function filterEmailChain(issueComment, cleanupMessage) {
   if (typeof issueComment != 'string') {
     throw new TypeError('filterEmailChain expects a string');
   }
@@ -9,13 +9,22 @@ module.exports = async function filterEmailChain(issueComment) {
      * Handles Outlook and Gmail
      * @type {RegExp}
      */
+    const filterEmailChain = require('./cleanupMessage');
+
     const OUTLOOK_EMAIL_REGEX = /^\s*(From:.*[^]*)\b(?:unsubscribe.)$/gm;
     const GMAIL_EMAIL_REGEX = /^\s*(on .*[^]*)\b(wrote:.*[^]*)+(reply to this email directly,.*[^]*)+>(.*\s*)$/gm;
 
     if (issueComment.match(OUTLOOK_EMAIL_REGEX) !== null) {
       console.log('Filtering issue comment for outlook remenants');
+
       const filteredComment = async () => {
-        return issueComment.replace(OUTLOOK_EMAIL_REGEX, '');
+        // Remove email clutter
+        let draftUpdatedComment = issueComment.replace(OUTLOOK_EMAIL_REGEX, '');
+        // Optionally perform additional message cleanup
+        if (cleanupComment) {
+          draftUpdatedComment = await cleanupMessage(draftUpdatedComment);
+        }
+        return draftUpdatedComment;
       };
       return await filteredComment();
     } else if (issueComment.match(GMAIL_EMAIL_REGEX) !== null) {
@@ -42,10 +51,11 @@ module.exports = async function filterEmailChain(issueComment) {
       return updatedComment;
     }
   };
-  const updatedComment = await filterReply(issueComment);
+
+  const updatedComment = await filterReply(issueComment, cleanupComment);
 
   if (updatedComment !== false) {
-    return await filterBoss(updatedComment);
+    return await filterBoss(updatedComment, cleanupMessage);
   } else {
     return updatedComment;
   }
