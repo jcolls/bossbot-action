@@ -8,6 +8,8 @@ inputs:
     required: true
   show_annotation:
     required: false
+  REGEX_TOKEN:
+    required: true
 runs:
   using: "node12"
   main: "index.js"
